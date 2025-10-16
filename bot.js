@@ -2,10 +2,10 @@ const TelegramBot = require('node-telegram-bot-api');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 const express = require('express');
-require('dotenv').config(); 
+const { BOT_TOKEN, MONGO_URI, OWNER_ID } = require('./config');
 // MongoDB connection setup
-const mongoUri = "mongodb+srv://daxonultra:fGhF1ggBqt1semxN@cluster0.u1t6q.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-mongoose.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
+
+mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("Connected to MongoDB"))
   .catch(err => console.error("MongoDB connection error:", err));
 
@@ -41,9 +41,9 @@ const BatchModel = mongoose.model('Batch', batchSchema);
 
 // Bot setup
 const app = express();
-const BOT_TOKEN = '7616543161:AAE8jLCI2Ub_vuVRoj6L1fLu8Bl96KwBb9g';
+// const BOT_TOKEN = '7616543161:AAE8jLCI2Ub_vuVRoj6L1fLu8Bl96KwBb9g';
 const bot = new TelegramBot(BOT_TOKEN, { polling: true });
-const OWNER_ID = 6713397633;
+// const OWNER_ID = 6713397633;
 
 let isBatchActive = false;
 let batchFiles = [];
