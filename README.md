@@ -1,4 +1,3 @@
-```markdown
 # 📁 File Store Telegram Bot
 
 A simple and efficient Node.js Telegram bot to **store files** and generate **permanent shareable links**. Easily upload files via Telegram and share them through unique URLs.
