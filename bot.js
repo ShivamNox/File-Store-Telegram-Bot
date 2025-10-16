@@ -2,6 +2,7 @@ const TelegramBot = require('node-telegram-bot-api');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 const express = require('express');
+require('dotenv').config(); 
 // MongoDB connection setup
 const mongoUri = "mongodb+srv://daxonultra:fGhF1ggBqt1semxN@cluster0.u1t6q.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 mongoose.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
