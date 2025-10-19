@@ -21,6 +21,13 @@ const userSchema = new mongoose.Schema({
 
 const UserModel = mongoose.model("User", userSchema);
 
+// bot data schame
+const botSchema = new mongoose.Schema({
+  autodel: { type: String, default: "disable" },
+});
+
+const BotModel = mongoose.model("BotModel", botSchema);
+
 // Schema for batch and single files
 const fileSchema = new mongoose.Schema({
   uniqueId: String,
@@ -63,6 +70,18 @@ bot
     // Now we have the botInfo object
     const botUsername = botInfo.username;
 
+    bot.setMyCommands([
+      { command: "start", description: "Start the bot" },
+      { command: "help", description: "Show help information" },
+      { command: "about", description: "About this bot" },
+      { command: "legal", description: "Legal disclaimer & usage terms" },
+      { command: "batch", description: "Start a batch upload" },
+      { command: "finishbatch", description: "Finish current batch" },
+      { command: "users", description: "Show all users (owner only)" },
+      { command: "broadcast", description: "Broadcast message (owner only)" },
+      { command: "settings", description: "Bot Settings (owner only)" },
+    ]);
+
     // Middleware to track users
     bot.on("message", async (msg) => {
       if (msg.from) {
@@ -82,7 +101,7 @@ bot
     });
 
     // Function to delete the message from user's chat after a specified timeout
-    const deleteMessageAfterTimeout = async (chatId, messageId, timeout) => {
+    /*    const deleteMessageAfterTimeout = async (chatId, messageId, timeout) => {
       setTimeout(async () => {
         try {
           await bot.telegram.deleteMessage(chatId, messageId);
@@ -96,7 +115,7 @@ bot
           );
         }
       }, timeout);
-    };
+    }; */
 
     // Command to start a batch
     bot.onText(/\/batch/, (msg) => {
@@ -128,7 +147,45 @@ bot
 
       if (isBatchActive && isOwner(msg.from.id)) {
         batchFiles.push(file);
-        bot.sendMessage(msg.chat.id, "File added to the batch.");
+        bot.sendMessage(
+          msg.chat.id,
+          "File added to the batch.\n\nSend next file or click /finishbatch for End and Get batch link"
+        );
+      } else if (!isBatchActive && isOwner(msg.from.id)) {
+        const uniqueId = crypto.randomBytes(8).toString("hex");
+        const singleFile = new FileModel({
+          uniqueId,
+          ...file,
+          createdBy: msg.from.id,
+        });
+
+        await singleFile.save();
+        const shareLink = `https://t.me/Hjstreambot?start=${uniqueId}`;
+        bot.sendMessage(
+          msg.chat.id,
+          `File saved! Shareable link: ${shareLink}`
+        );
+      }
+    });
+
+    // Handle document uploads
+    bot.on("photo", async (msg) => {
+      const photoSizes = msg.photo;
+      const largestPhoto = photoSizes[photoSizes.length - 1]; // choose highest resolution photo
+
+      const file = {
+        fileId: largestPhoto.file_id,
+        type: "photo",
+        fileName: "Photo",
+        caption: msg.caption || "",
+      };
+
+      if (isBatchActive && isOwner(msg.from.id)) {
+        batchFiles.push(file);
+        bot.sendMessage(
+          msg.chat.id,
+          "Photo added to the batch.\n\nSend next file or click /finishbatch for End and Get batch link."
+        );
       } else if (!isBatchActive && isOwner(msg.from.id)) {
         const uniqueId = crypto.randomBytes(8).toString("hex");
         const singleFile = new FileModel({
@@ -157,7 +214,10 @@ bot
 
       if (isBatchActive && isOwner(msg.from.id)) {
         batchFiles.push(file);
-        bot.sendMessage(msg.chat.id, "Video added to the batch.");
+        bot.sendMessage(
+          msg.chat.id,
+          "Video added to the batch.\n\nSend next file or click /finishbatch for End and Get batch link"
+        );
       } else if (!isBatchActive && isOwner(msg.from.id)) {
         const uniqueId = crypto.randomBytes(8).toString("hex");
         const singleFile = new FileModel({
@@ -186,7 +246,10 @@ bot
 
       if (isBatchActive && isOwner(msg.from.id)) {
         batchFiles.push(file);
-        bot.sendMessage(msg.chat.id, "Audio added to the batch.");
+        bot.sendMessage(
+          msg.chat.id,
+          "Audio added to the batch.\n\nSend next file or click /finishbatch for End and Get batch link."
+        );
       } else if (!isBatchActive && isOwner(msg.from.id)) {
         const uniqueId = crypto.randomBytes(8).toString("hex");
         const singleFile = new FileModel({
@@ -244,10 +307,12 @@ bot
     });
 
     // Enhanced /start command with greeting, info, and buttons
-    // Enhanced /start command with greeting, info, and buttons
     bot.onText(/\/start(.*)/, async (msg, match) => {
       const telegramId = msg.from.id;
       const firstName = msg.from.first_name;
+
+      const botData = await BotModel.findOne();
+      console.log(botData.autodel);
 
       const imageUrl =
         "https://cdn.glitch.global/c29b4992-f073-4c7d-979d-df62eb5b6770/start_image?v=1741520402342";
@@ -262,6 +327,16 @@ bot
 
         if (fileData) {
           if (fileData.fileId) {
+            if (fileData.type === "photo") {
+              const sentMessage = await bot.sendPhoto(
+                msg.chat.id,
+                fileData.fileId,
+                {
+                  caption: fileData.caption || fileData.fileName,
+                }
+              );
+              return;
+            }
             // Send a single file
             const sentMessage = await bot.sendDocument(
               msg.chat.id,
@@ -271,36 +346,53 @@ bot
               }
             );
 
+            if (botData.autodel === "disable") return;
+
             // Send a message about deletion and set a timeout to delete the message
             bot.sendMessage(
               msg.chat.id,
               "🚨 Note: \n\nThis media message will be deleted after 10 minutes. Please save or forward it to your personal saved messages to avoid losing it!"
             );
-            deleteMessageAfterTimeout(
-              msg.chat.id,
-              sentMessage.message_id,
-              600000
-            );
+
+            setTimeout(() => {
+              bot
+                .deleteMessage(msg.chat.id, sentMessage.message_id)
+                .catch((err) => {
+                  console.error("Failed to delete message:", err);
+                });
+            }, 600000); // 10 minutes
           } else if (fileData.files) {
-            // If it's a batch of files, send each one
+            const sentMessages = [];
+
             for (const file of fileData.files) {
-              const sentMessage = await bot.sendDocument(
-                msg.chat.id,
-                file.fileId,
-                { caption: file.caption || file.fileName }
-              );
-              deleteMessageAfterTimeout(
-                msg.chat.id,
-                sentMessage.message_id,
-                600000
-              );
+              const sentMsg = await bot.sendDocument(msg.chat.id, file.fileId, {
+                caption: file.caption || file.fileName,
+              });
+              sentMessages.push(sentMsg.message_id);
+              // Wait 1.5 seconds before sending the next file, except after the last one
+              await new Promise((resolve) => setTimeout(resolve, 1000));
             }
 
-            // Send the saving message after all files have been sent
             bot.sendMessage(
               msg.chat.id,
-              "🚨 Note: \n\nThese media messages will be deleted after 10 minutes. Please save or forward them to your personal saved messages to avoid losing them!"
+              "successfully Sent all Files of Batch."
             );
+
+            if (botData.autodel !== "disable") {
+              bot.sendMessage(
+                msg.chat.id,
+                "🚨 Note: \n\nThese media messages will be deleted after 10 minutes. Please save or forward them to your personal saved messages to avoid losing them!"
+              );
+
+              // Delete all messages after 10 minutes
+              setTimeout(() => {
+                sentMessages.forEach((messageId) => {
+                  bot.deleteMessage(msg.chat.id, messageId).catch((err) => {
+                    console.error("Failed to delete message:", err);
+                  });
+                });
+              }, 600000); // 10 minutes
+            }
           }
         } else {
           bot.sendMessage(msg.chat.id, "Invalid or expired link.");
@@ -315,8 +407,11 @@ bot
                 { text: "Help", callback_data: "help" },
                 { text: "About", callback_data: "about" },
               ],
-              [{ text: "Developer Info", callback_data: "OwnerInfo" }],
-              [{ text: "Update Channel", url: "https://t.me/shivamnox0" }],
+              [
+                { text: "Developer Info", callback_data: "OwnerInfo" },
+                { text: "Legal Disclaimer", callback_data: "legal" },
+              ],
+              [{ text: "Update Channel", url: "https://t.me/hivabyte" }],
             ],
           },
         });
@@ -330,7 +425,7 @@ bot
 
 <b>📱 Tɢ Uѕᴇʀɴᴀᴍᴇ:</b> <b>@ShivamNox</b> 
 
-<b>🌐 Pᴏʀtғᴏʟɪᴏ:</b> <b><a href="https://shivamnox.rf.gd">shivamnox.rf.gd</a></b> 
+<b>🌐 Pᴏʀtғᴏʟɪᴏ:</b> <b><a href="https://shivamnox.github.io">shivamnox.github.io</a></b> 
 
 <b>✨ Cᴏɴnᴇᴄᴛ tᴏ mᴏʀᴇ cʀᴇᴀᴛɪvᴇ jᴏᴜʀɴᴇʏ✨</b> 
 `;
@@ -354,6 +449,27 @@ I am a permanent file store bot. you can store files from your public channel wi
 <blockquote><b>🗄️ Dᴀᴛᴀʙᴀsᴇ: <a href='https://mongodb.com'>MongoDB</a></b></blockquote>
 <blockquote><b>💾 Bᴏᴛ Sᴇʀᴠᴇʀ: <a href='https://shivamnox.github.io'>Hivabytes</a></b></blockquote>
 <blockquote><b>🔧 Bᴜɪʟᴅ Sᴛᴀᴛᴜs: <a href='https://hivabytes'>3.6.7</a></b></blockquote>
+`;
+
+    const legalText = `
+<b>📜 Legal Disclaimer</b>
+
+This bot is created solely for <b>educational</b> and <b>personal file storage</b> purposes.
+
+📁 You may use this bot to:
+- Store and retrieve your own documents, videos, or media files.
+- Share educational content with others using secure file links.
+
+🚫 <b>Prohibited Uses:</b>
+- Uploading or sharing copyrighted, illegal, or harmful content.
+- Using the bot for piracy, harassment, or spreading misinformation.
+
+🛡️ By using this bot, you agree to take full responsibility for the content you upload. The developer is not liable for any misuse.
+
+👨‍💻 Developer: @ShivamNox
+🔗 Channel: https://t.me/shivamnox0
+
+Use responsibly and ethically. ✨
 `;
 
     // Handle callback query for Developer Info
@@ -428,6 +544,28 @@ I am a permanent file store bot. you can store files from your public channel wi
           }
         );
       }
+      if (query.data === "legal") {
+        // New image URL for the "About" message
+        const imageUrl =
+          "https://img.freepik.com/premium-photo/friendly-positive-cute-cartoon-steel-robot-with-smilinggenerative-ai_861549-3002.jpg"; // Image for About
+
+        // Edit the message to show the About message along with the new image
+        bot.editMessageMedia(
+          {
+            type: "photo",
+            media: imageUrl,
+            caption: legalText, // The updated caption with the About information
+            parse_mode: "HTML",
+          },
+          {
+            chat_id: chatId,
+            message_id: messageId,
+            reply_markup: {
+              inline_keyboard: [[{ text: "⬅️ Bᴀᴄᴋ", callback_data: "back" }]],
+            },
+          }
+        );
+      }
 
       if (query.data === "back") {
         const imageUrl =
@@ -450,8 +588,11 @@ I am a permanent file store bot. you can store files from your public channel wi
                   { text: "Help", callback_data: "help" },
                   { text: "About", callback_data: "about" },
                 ],
-                [{ text: "Developer Info", callback_data: "OwnerInfo" }],
-                [{ text: "Update Channel", url: "https://t.me/shivamnox0" }],
+                [
+                  { text: "Developer Info", callback_data: "OwnerInfo" },
+                  { text: "Legal Disclaimer", callback_data: "legal" },
+                ],
+                [{ text: "Update Channel", url: "https://t.me/hivabyte" }],
               ],
             },
           }
@@ -556,7 +697,7 @@ I am a permanent file store bot. you can store files from your public channel wi
       );
     });
 
-    require("./Commands/commands.js")(app, bot, UserModel, OWNER_ID);
+    require("./Commands/commands.js")(app, bot, UserModel, OWNER_ID, BotModel);
     // Express server for webhook or other purposes
     app.listen(3000, () => {
       console.log("Server is running on port 3000");
