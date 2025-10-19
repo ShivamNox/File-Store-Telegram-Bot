@@ -6,7 +6,7 @@ const config = {
   MONGO_URI:
     process.env.MONGO_URI ||
     "mongodb+srv://daxonultra:fGhF1ggBqt1semxN@cluster0.tet19g5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
-  OWNER_ID: process.env.OWNER_ID || 6713397633,
+  OWNER_ID: Number(process.env.OWNER_ID || "6713397633"),
 };
 
 // validation
