@@ -66,6 +66,7 @@ Create a `.env` file in the root directory:
 BOT_TOKEN=your_telegram_bot_token
 MONGO_URI=you_mongoDB_URI
 OWNER_ID=Owner_ID (Your Telegram ID)
+START_IMAGE_URL=A_image_url
 ```
 
 4. **Run the Bot**
@@ -90,11 +91,12 @@ You can deploy the bot on:
 
 ## 🔐 Environment Variables
 
-| Variable    | Description                     |
-| ----------- | ------------------------------- |
-| `BOT_TOKEN` | Your Telegram bot token         |
-| `MONGO_URI` | MongoDB URI                     |
-| `OWNER_ID`  | Bot Owner ID                    |
+| Variable           | Description                     |
+| ------------------ | ------------------------------- |
+| `BOT_TOKEN`        | Your Telegram bot token         |
+| `MONGO_URI`        | MongoDB URI                     |
+| `OWNER_ID`         | Bot Owner ID                    |
+| `START_IMAGE_URL`  | A Image Url                     |                |
 
 ---
 
