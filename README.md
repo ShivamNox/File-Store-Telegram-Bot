@@ -64,7 +64,8 @@ Create a `.env` file in the root directory:
 
 ```env
 BOT_TOKEN=your_telegram_bot_token
-BASE_URL=https://yourdomain.com  # Optional, for generating links
+MONGO_URI=you_mongoDB_URI
+OWNER_ID=Owner_ID (Your Telegram ID)
 ```
 
 4. **Run the Bot**
@@ -92,7 +93,8 @@ You can deploy the bot on:
 | Variable    | Description                     |
 | ----------- | ------------------------------- |
 | `BOT_TOKEN` | Your Telegram bot token         |
-| `BASE_URL`  | (Optional) Your server base URL |
+| `MONGO_URI` | MongoDB URI                     |
+| `OWNER_ID`  | Bot Owner ID                    |
 
 ---
 
