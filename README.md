@@ -25,9 +25,18 @@ Try the bot live here: [@YourBotUsername](https://t.me/YourBotUsername)
 
 ```
 
-📁 File-Store-Telegram-Bot
-├── bot.js              # Main bot logic
-└── package.json        # Project metadata and dependencies
+📁 File-Store-Telegram-Bot/
+├── 📁 commands/                  # Modular bot commands
+│   ├── disclaimer.js
+│   ├── settings.js
+│   └── start.js
+│
+├── bot.js                        # Entry point for the bot
+├── config.js                     # Configuration file (API keys, settings, etc.)
+├── package.json                  # Project metadata and dependencies
+├── package-lock.json             # Exact dependency versions
+├── README.md                     # Project documentation
+
 
 ````
 
