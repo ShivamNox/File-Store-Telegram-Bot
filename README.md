@@ -14,13 +14,6 @@ A simple and efficient Node.js Telegram bot to **store files** and generate **pe
 
 ---
 
-## 🚀 Live Bot
-
-Try the bot live here: [@YourBotUsername](https://t.me/YourBotUsername)  
-> *(Replace with your actual bot username)*
-
----
-
 ## 📂 Project Structure
 
 ```
@@ -107,15 +100,6 @@ You can deploy the bot on:
 | `MONGO_URI`        | MongoDB URI                     |
 | `OWNER_ID`         | Bot Owner ID                    |
 | `START_IMAGE_URL`  | A Image Url                     |                |
-
----
-
-## 📸 Preview
-
-> *Add a screenshot or GIF here to show the bot in action*
-> Example:
-
-![Bot Screenshot](https://your-image-link.com/screenshot.png)
 
 ---
 
