@@ -86,7 +86,7 @@ module.exports = function ( app, bot, UserModel, OWNER_ID, BotModel, botUsername
     } else {
       // If no payload, send the welcome message with inline buttons
       await bot.sendPhoto(msg.chat.id, START_IMAGE_URL, {
-        caption: `Hello, ${firstName}! 👋\n\nWelcome to the bot. Here you can upload files or create batches of files to share later.\n\nChoose an option below:`,
+        caption: `Hello, ${firstName}! 👋\n\nWelcome to the bot. Here you can upload files or create batches of files to share later.\n\nJust Send Me Any File and Get Share link:`,
         reply_markup: {
           inline_keyboard: [
             [
@@ -243,7 +243,7 @@ module.exports = function ( app, bot, UserModel, OWNER_ID, BotModel, botUsername
         {
           type: "photo",
           media: START_IMAGE_URL, // The same image as the original one
-          caption: `Hello, ${firstName}! 👋\n\nWelcome to the bot. Here you can upload files or create batches of files to share later.\n\nChoose an option below:`, // The original greeting caption
+          caption: `Hello, ${firstName}! 👋\n\nWelcome to the bot. Here you can upload files or create batches of files to share later.\n\nJust Send Me Any File and Get Share link:`, // The original greeting caption
           parse_mode: "HTML",
         },
         {
