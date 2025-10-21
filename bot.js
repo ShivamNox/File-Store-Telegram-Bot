@@ -71,14 +71,14 @@ bot
 
     bot.setMyCommands([
       { command: "start", description: "Start the bot" },
-      { command: "help", description: "Show help information" },
-      { command: "about", description: "About this bot" },
-      { command: "legal", description: "Legal disclaimer & usage terms" },
       { command: "batch", description: "Start a batch upload" },
       { command: "finishbatch", description: "Finish current batch" },
       { command: "users", description: "Show all users (owner only)" },
       { command: "broadcast", description: "Broadcast message (owner only)" },
       { command: "settings", description: "Bot Settings (owner only)" },
+      { command: "help", description: "Show help information" },
+      { command: "about", description: "About this bot" },
+      { command: "legal", description: "Legal disclaimer & usage terms" },
     ]);
 
     // Middleware to track users
