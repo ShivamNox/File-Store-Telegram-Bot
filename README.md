@@ -26,17 +26,18 @@ Try the bot live here: [@YourBotUsername](https://t.me/YourBotUsername)
 ```
 
 📁 File-Store-Telegram-Bot/
-├── 📁 commands/                  # Modular bot commands
-│   ├── disclaimer.js
-│   ├── settings.js
-│   └── start.js
+├── 📁 commands/                  # All bot command modules
+│   ├── commands.js              # Possibly a command handler or aggregator
+│   ├── disclaimer.js            # Handles /disclaimer command
+│   ├── settings.js              # Handles /settings command
+│   └── start.js                 # Handles /start command
 │
-├── bot.js                        # Entry point for the bot
-├── config.js                     # Configuration file (API keys, settings, etc.)
-├── package.json                  # Project metadata and dependencies
-├── package-lock.json             # Exact dependency versions
-├── README.md                     # Project documentation
-
+├── bot.js                       # Main bot logic and entry point
+├── config.js                    # Bot configuration (or use .env)
+├── package.json                 # Project metadata and dependencies
+├── package-lock.json            # Lock file for npm
+├── README.md                    # Project documentation
+└── .gitignore                   # Ignored files for git (e.g., node_modules, .env)
 
 ````
 
