@@ -5,6 +5,7 @@ const express = require("express");
 const { BOT_TOKEN, MONGO_URI, OWNER_ID, START_IMAGE_URL } = require("./config");
 // MongoDB connection setup
 
+mongoose.set('strictQuery', true); // or false, depending on your preference
 mongoose
   .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("Connected to MongoDB"))
